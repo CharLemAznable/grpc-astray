@@ -18,6 +18,7 @@ import java.net.SocketAddress;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 
 import static com.github.charlemaznable.core.lang.ClzPath.classExists;
 import static org.joor.Reflect.on;
@@ -68,7 +69,7 @@ public class NettyServerBuilderConfiguration implements EnvironmentAware {
 
     private ServerBuilder nettyServerBuilder(GRpcServerProperties grpcServerProperties,
                                              Function<InetSocketAddress, ServerBuilder> mapper,
-                                             Function<Integer, ServerBuilder> defaultBuilder) {
+                                             IntFunction<ServerBuilder> defaultBuilder) {
         return Optional.ofNullable(grpcServerProperties.getNettyServer()).map(nettyServerProperties -> {
             val builder = Optional.ofNullable(nettyServerProperties.getPrimaryListenAddress())
                     .map(mapper).orElse(defaultBuilder.apply(grpcServerProperties.getRunningPort()));
