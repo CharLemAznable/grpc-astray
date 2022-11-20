@@ -79,7 +79,12 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
-            <version>1.50.0</version>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>javax.validation</groupId>
