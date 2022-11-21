@@ -6,6 +6,7 @@ import com.github.charlemaznable.core.context.FactoryContext;
 import com.github.charlemaznable.core.lang.ClzPath;
 import com.github.charlemaznable.core.lang.EasyEnhancer;
 import com.github.charlemaznable.core.lang.Factory;
+import com.github.charlemaznable.core.lang.Reloadable;
 import com.github.charlemaznable.grpc.astray.client.internal.GRpcClientDummy;
 import com.github.charlemaznable.grpc.astray.client.internal.GRpcClientProxy;
 import com.google.common.cache.LoadingCache;
@@ -61,7 +62,7 @@ public final class GRpcFactory {
             ensureClassIsAnInterface(clazz);
             return wrapWestCacheable(clazz,
                     EasyEnhancer.create(GRpcClientDummy.class,
-                            new Class[]{clazz},
+                            new Class[]{clazz, Reloadable.class},
                             method -> {
                                 if (method.isDefault()) return 1;
                                 return 0;

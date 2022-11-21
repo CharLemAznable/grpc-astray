@@ -2,6 +2,7 @@ package com.github.charlemaznable.grpc.astray.client.internal;
 
 import com.github.charlemaznable.core.context.FactoryContext;
 import com.github.charlemaznable.core.lang.Factory;
+import com.github.charlemaznable.core.lang.Reloadable;
 import com.github.charlemaznable.grpc.astray.client.GRpcChannel;
 import com.github.charlemaznable.grpc.astray.client.GRpcChannel.ChannelProvider;
 import com.github.charlemaznable.grpc.astray.client.GRpcChannelBalance;
@@ -33,7 +34,7 @@ import static lombok.AccessLevel.PRIVATE;
 import static org.springframework.core.annotation.AnnotatedElementUtils.getMergedAnnotation;
 import static org.springframework.util.ClassUtils.getShortName;
 
-public final class GRpcClientProxy implements MethodInterceptor {
+public final class GRpcClientProxy implements MethodInterceptor, Reloadable {
 
     Class clazz;
     Factory factory;
@@ -47,9 +48,7 @@ public final class GRpcClientProxy implements MethodInterceptor {
     public GRpcClientProxy(Class clazz, Factory factory) {
         this.clazz = clazz;
         this.factory = factory;
-        this.serviceName = Elf.checkGRpcServiceName(this.clazz);
-        this.channelList = Elf.checkChannelList(this.clazz, this.factory);
-        this.channelBalancer = Elf.checkChannelBalancer(this.clazz, this.factory);
+        this.initialize();
     }
 
     @Override
@@ -59,9 +58,25 @@ public final class GRpcClientProxy implements MethodInterceptor {
             return methodProxy.invokeSuper(o, args);
         }
 
+        if (method.getDeclaringClass().equals(Reloadable.class)) {
+            return method.invoke(this, args);
+        }
+
         val callProxy = get(callProxyCache, method);
         val channel = this.channelBalancer.choose(this.channelList);
         return callProxy.execute(channel, args);
+    }
+
+    @Override
+    public void reload() {
+        this.initialize();
+        this.callProxyCache.invalidateAll();
+    }
+
+    private void initialize() {
+        this.serviceName = Elf.checkGRpcServiceName(this.clazz);
+        this.channelList = Elf.checkChannelList(this.clazz, this.factory);
+        this.channelBalancer = Elf.checkChannelBalancer(this.clazz, this.factory);
     }
 
     private GRpcCallProxy loadCallProxy(Method method) {
