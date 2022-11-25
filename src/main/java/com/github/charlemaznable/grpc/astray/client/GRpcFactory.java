@@ -12,7 +12,6 @@ import com.github.charlemaznable.grpc.astray.client.internal.GRpcClientProxy;
 import com.google.common.cache.LoadingCache;
 import lombok.NoArgsConstructor;
 import net.sf.cglib.proxy.Callback;
-import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.NoOp;
 
 import javax.annotation.Nonnull;
@@ -68,7 +67,8 @@ public final class GRpcFactory {
                                 return 0;
                             }, new Callback[]{
                                     new GRpcClientProxy(clazz, factory),
-                                    NoOp.INSTANCE}, null));
+                                    NoOp.INSTANCE
+                            }, new Object[]{clazz}));
         }
 
         private <T> void ensureClassIsAnInterface(Class<T> clazz) {
@@ -79,8 +79,10 @@ public final class GRpcFactory {
         private <T> Object wrapWestCacheable(Class<T> clazz, Object impl) {
             if (ClzPath.classExists("com.github.bingoohuang.westcache.cglib.CglibCacheMethodInterceptor")
                     && Anns.isFastWestCacheAnnotated(clazz)) {
-                return Enhancer.create(GRpcClientDummy.class, new Class[]{clazz},
-                        new CglibCacheMethodInterceptor(impl));
+                return EasyEnhancer.create(GRpcClientDummy.class,
+                        new Class[]{clazz, Reloadable.class},
+                        new CglibCacheMethodInterceptor(impl),
+                        new Object[]{clazz});
             }
             return impl;
         }

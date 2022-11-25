@@ -1,10 +1,11 @@
 package com.github.charlemaznable.grpc.astray.client.internal;
 
-import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Properties;
 
 import static com.github.charlemaznable.core.config.Arguments.argumentsAsProperties;
@@ -12,7 +13,7 @@ import static com.github.charlemaznable.core.lang.ClzPath.classResourceAsPropert
 import static com.github.charlemaznable.core.lang.Propertiess.ssMap;
 import static java.util.Objects.isNull;
 
-@NoArgsConstructor
+@AllArgsConstructor
 public class GRpcClientDummy {
 
     static final Logger log = LoggerFactory.getLogger("GRpcClient");
@@ -26,6 +27,9 @@ public class GRpcClientDummy {
                 grpcClassPathProperties))).replace(source);
     }
 
+    @Nonnull
+    private Class<?> implClass;
+
     @Override
     public boolean equals(Object obj) {
         return obj instanceof GRpcClientDummy && hashCode() == obj.hashCode();
@@ -38,6 +42,6 @@ public class GRpcClientDummy {
 
     @Override
     public String toString() {
-        return "GRpcClient@" + Integer.toHexString(hashCode());
+        return "GRpcClient:" + implClass.getSimpleName() + "@" + Integer.toHexString(hashCode());
     }
 }
