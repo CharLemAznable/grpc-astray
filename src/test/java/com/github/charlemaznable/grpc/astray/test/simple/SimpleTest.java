@@ -46,5 +46,9 @@ public class SimpleTest {
 
         assertThrows(GRpcClientException.class,
                 () -> GRpcFactory.getClient(ErrorClient.class));
+
+        val respCache1 = client.testCache("req");
+        val respCache2 = client.testCache("req");
+        assertEquals(respCache1, respCache2);
     }
 }

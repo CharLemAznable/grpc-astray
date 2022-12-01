@@ -3,6 +3,8 @@ package com.github.charlemaznable.grpc.astray.test.simple;
 import com.github.charlemaznable.grpc.astray.server.GRpcMethod;
 import com.github.charlemaznable.grpc.astray.server.GRpcService;
 
+import static com.github.charlemaznable.core.lang.Str.toStr;
+
 @GRpcService("Simple")
 public class SimpleService {
 
@@ -55,5 +57,10 @@ public class SimpleService {
     public SimpleBean testBean(SimpleBean req) {
         req.setContent("response: " + req.getContent() + ", ^_^");
         return req;
+    }
+
+    @GRpcMethod
+    public String testCache(String req) {
+        return req + ":" + toStr(System.currentTimeMillis());
     }
 }
