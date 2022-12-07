@@ -7,7 +7,7 @@ import com.google.auto.service.AutoService;
 import net.sf.cglib.proxy.Callback;
 
 @AutoService(GRpcClientEnhancer.class)
-public class WestCacheableGRpcClientEnhancer implements GRpcClientEnhancer {
+public final class WestCacheableGRpcClientEnhancer implements GRpcClientEnhancer {
 
     @Override
     public boolean isEnabled(Class<?> clientClass) {

@@ -10,7 +10,7 @@ import java.util.List;
 import static com.github.charlemaznable.core.lang.Listt.newArrayList;
 
 @AutoService(WestCacheExcludeAnnotationTypeSupplier.class)
-public class WestCacheableGRpcClientExcluder implements WestCacheExcludeAnnotationTypeSupplier {
+public final class WestCacheableGRpcClientExcluder implements WestCacheExcludeAnnotationTypeSupplier {
 
     @Override
     public List<Class<? extends Annotation>> get() {
