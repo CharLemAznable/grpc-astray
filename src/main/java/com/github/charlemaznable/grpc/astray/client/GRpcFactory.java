@@ -14,7 +14,11 @@ import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.NoOp;
 
 import javax.annotation.Nonnull;
+import java.util.Comparator;
+import java.util.List;
 import java.util.ServiceLoader;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static com.github.charlemaznable.core.lang.Condition.checkNotNull;
 import static com.github.charlemaznable.core.lang.LoadingCachee.get;
@@ -28,10 +32,13 @@ public final class GRpcFactory {
 
     private static LoadingCache<Factory, GRpcLoader> loaderCache
             = simpleCache(from(GRpcLoader::new));
-    private static ServiceLoader<GRpcClientEnhancer> enhancerLoaders;
+    private static List<GRpcClientEnhancer> enhancers;
 
     static {
-        enhancerLoaders = ServiceLoader.load(GRpcClientEnhancer.class);
+        enhancers = StreamSupport
+                .stream(ServiceLoader.load(GRpcClientEnhancer.class).spliterator(), false)
+                .sorted(Comparator.comparingInt(GRpcClientEnhancer::getOrder).reversed())
+                .collect(Collectors.toList());
     }
 
     public static <T> T getClient(Class<T> clazz) {
@@ -83,11 +90,11 @@ public final class GRpcFactory {
 
         private <T> Object wrapWithEnhancer(Class<T> clazz, Object impl) {
             Object enhancedImpl = impl;
-            for (val enhancerLoader : enhancerLoaders) {
-                if (enhancerLoader.isEnabled(clazz)) {
+            for (val enhancer : enhancers) {
+                if (enhancer.isEnabled(clazz)) {
                     enhancedImpl = EasyEnhancer.create(GRpcClientDummy.class,
                             new Class[]{clazz, Reloadable.class},
-                            enhancerLoader.build(clazz, impl),
+                            enhancer.build(clazz, enhancedImpl),
                             new Object[]{clazz});
                 }
             }

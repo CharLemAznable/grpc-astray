@@ -1,5 +1,6 @@
 package com.github.charlemaznable.grpc.astray.test.simple;
 
+import blossom.Blossom;
 import com.github.bingoohuang.westcache.WestCacheable;
 import com.github.charlemaznable.grpc.astray.client.GRpcChannel;
 import com.github.charlemaznable.grpc.astray.client.GRpcChannelBalance;
@@ -32,5 +33,6 @@ public interface SimpleClient {
     SimpleBean testBean(SimpleBean req);
 
     @WestCacheable
+    @Blossom
     String testCache(String req);
 }

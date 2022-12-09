@@ -55,6 +55,11 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>com.github.charlemaznable</groupId>
+            <artifactId>blossom-aspect</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
