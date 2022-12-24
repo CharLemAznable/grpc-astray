@@ -1,13 +1,12 @@
 package com.github.charlemaznable.grpc.astray.test.validation;
 
 import com.github.charlemaznable.grpc.astray.client.GRpcScan;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.hibernate.validator.HibernateValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-
-import javax.validation.Validation;
-import javax.validation.Validator;
 
 @Configuration
 @ComponentScan

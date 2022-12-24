@@ -2,7 +2,7 @@ package com.github.charlemaznable.grpc.astray.test.invocation;
 
 public class InvocationContext {
 
-    private static ThreadLocal<String> tenantLocal = new InheritableThreadLocal<>();
+    private static final ThreadLocal<String> tenantLocal = new InheritableThreadLocal<>();
 
     public static void setTenant(String tenant) {
         tenantLocal.set(tenant);

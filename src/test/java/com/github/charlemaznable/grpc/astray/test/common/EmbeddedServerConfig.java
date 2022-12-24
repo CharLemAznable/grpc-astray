@@ -3,23 +3,26 @@ package com.github.charlemaznable.grpc.astray.test.common;
 import com.github.charlemaznable.grpc.astray.client.GRpcChannel.ChannelProvider;
 import io.grpc.ServerBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@SuppressWarnings("rawtypes")
 @Configuration
 @ConditionalOnProperty(prefix = "grpc", name = "embeddedServerName")
-@EnableConfigurationProperties(EmbeddedServerProperties.class)
 public class EmbeddedServerConfig {
 
+    @Value("${grpc.embeddedServerName}")
+    private String embeddedServerName;
+
     @Bean
-    public ServerBuilder embeddedServerBuilder(EmbeddedServerProperties embeddedServerProperties) {
-        return InProcessServerBuilder.forName(embeddedServerProperties.getEmbeddedServerName());
+    public ServerBuilder embeddedServerBuilder() {
+        return InProcessServerBuilder.forName(embeddedServerName);
     }
 
     @Bean
-    public ChannelProvider embeddedChannelProvider(EmbeddedServerProperties embeddedServerProperties) {
-        return new EmbeddedChannelProvider(embeddedServerProperties.getEmbeddedServerName());
+    public ChannelProvider embeddedChannelProvider() {
+        return new EmbeddedChannelProvider(embeddedServerName);
     }
 }

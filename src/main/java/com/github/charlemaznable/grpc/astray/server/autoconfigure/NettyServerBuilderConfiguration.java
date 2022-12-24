@@ -23,7 +23,7 @@ import java.util.function.IntFunction;
 import static com.github.charlemaznable.core.lang.ClzPath.classExists;
 import static org.joor.Reflect.on;
 
-@SuppressWarnings({"SpringJavaInjectionPointsAutowiringInspection", "SpringFacetCodeInspection"})
+@SuppressWarnings({"SpringJavaInjectionPointsAutowiringInspection", "SpringFacetCodeInspection", "rawtypes"})
 @Configuration
 @ConditionalOnGRpcServerEnabled
 public class NettyServerBuilderConfiguration implements EnvironmentAware {
@@ -119,6 +119,7 @@ public class NettyServerBuilderConfiguration implements EnvironmentAware {
         }).orElse(ServerBuilder.forPort(grpcServerProperties.getRunningPort()));
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     @AllArgsConstructor
     private static class NettyServerBuilderWrapper {
 

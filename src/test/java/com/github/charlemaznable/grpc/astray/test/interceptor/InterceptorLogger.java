@@ -22,7 +22,7 @@ public class InterceptorLogger implements ServerInterceptor {
     @Override
     public <Q, R> ServerCall.Listener<Q> interceptCall(ServerCall<Q, R> call, Metadata headers,
                                                        ServerCallHandler<Q, R> next) {
-        val validationServerCall = new ForwardingServerCall.SimpleForwardingServerCall<Q, R>(call) {
+        val validationServerCall = new ForwardingServerCall.SimpleForwardingServerCall<>(call) {
 
             @Override
             public void sendMessage(R message) {
@@ -33,7 +33,7 @@ public class InterceptorLogger implements ServerInterceptor {
 
         ServerCall.Listener<Q> listener = next.startCall(validationServerCall, headers);
 
-        return new MessageBlockingServerCallListener<Q>(listener) {
+        return new MessageBlockingServerCallListener<>(listener) {
 
             @Override
             public void onMessage(Q message) {

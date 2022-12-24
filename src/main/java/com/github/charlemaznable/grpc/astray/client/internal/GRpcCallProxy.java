@@ -43,7 +43,7 @@ public final class GRpcCallProxy {
         this.returnFuture = Future.class == rt;
 
         val genericReturnType = method.getGenericReturnType();
-        if (!(genericReturnType instanceof ParameterizedType)) {
+        if (!(genericReturnType instanceof ParameterizedType parameterizedType)) {
             // 错误的泛型时
             if (this.returnFuture)
                 throw new GRpcClientException("Method return type generic Error");
@@ -52,17 +52,16 @@ public final class GRpcCallProxy {
         }
 
         // 方法返回泛型时
-        ParameterizedType parameterizedType = (ParameterizedType) genericReturnType;
         Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
         if (this.returnFuture) {
             // 返回Future类型, 则多处理一层泛型
             val futureTypeArgument = actualTypeArguments[0];
             if (!(futureTypeArgument instanceof ParameterizedType)) {
-                this.returnType = (Class) futureTypeArgument;
+                this.returnType = (Class<?>) futureTypeArgument;
                 return;
             }
             parameterizedType = (ParameterizedType) futureTypeArgument;
-            rt = (Class) parameterizedType.getRawType();
+            rt = (Class<?>) parameterizedType.getRawType();
         }
         this.returnType = rt;
     }

@@ -1,6 +1,6 @@
 package com.github.charlemaznable.grpc.astray.client.enhancer;
 
-import blossom.autoconfigure.exclude.BlossomExcludeAnnotationTypeSupplier;
+import blossom.spring.exclude.BlossomExcludeAnnotationTypeSupplier;
 import com.github.charlemaznable.grpc.astray.client.GRpcClient;
 import com.google.auto.service.AutoService;
 

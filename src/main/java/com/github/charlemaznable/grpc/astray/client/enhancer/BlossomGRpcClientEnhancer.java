@@ -1,23 +1,28 @@
 package com.github.charlemaznable.grpc.astray.client.enhancer;
 
-import blossom.cglib.BlossomCglibInterceptor;
 import blossom.common.BlossomElf;
+import blossom.enhance.BlossomBuddyInterceptor;
+import com.github.charlemaznable.core.lang.BuddyEnhancer;
 import com.github.charlemaznable.core.lang.ClzPath;
+import com.github.charlemaznable.core.lang.Reloadable;
+import com.github.charlemaznable.grpc.astray.client.internal.GRpcClientDummy;
 import com.google.auto.service.AutoService;
-import net.sf.cglib.proxy.Callback;
 
 @AutoService(GRpcClientEnhancer.class)
 public final class BlossomGRpcClientEnhancer implements GRpcClientEnhancer {
 
     @Override
     public boolean isEnabled(Class<?> clientClass) {
-        return ClzPath.classExists("blossom.cglib.BlossomCglibInterceptor")
+        return ClzPath.classExists("blossom.buddy.BlossomBuddyInterceptor")
                 && BlossomElf.isFastBlossomAnnotated(clientClass);
     }
 
     @Override
-    public Callback build(Class<?> clientClass, Object clientImpl) {
-        return new BlossomCglibInterceptor(clientImpl);
+    public Object build(Class<?> clientClass, Object clientImpl) {
+        return BuddyEnhancer.create(GRpcClientDummy.class,
+                new Object[]{clientClass},
+                new Class[]{clientClass, Reloadable.class},
+                new BlossomBuddyInterceptor(clientImpl));
     }
 
     @Override

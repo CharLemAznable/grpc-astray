@@ -1,6 +1,7 @@
 package com.github.charlemaznable.grpc.astray.client.internal;
 
 import com.github.charlemaznable.core.context.FactoryContext;
+import com.github.charlemaznable.core.lang.BuddyEnhancer;
 import com.github.charlemaznable.core.lang.Factory;
 import com.github.charlemaznable.core.lang.Reloadable;
 import com.github.charlemaznable.grpc.astray.client.GRpcChannel;
@@ -15,8 +16,6 @@ import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
 import lombok.NoArgsConstructor;
 import lombok.val;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -34,7 +33,8 @@ import static lombok.AccessLevel.PRIVATE;
 import static org.springframework.core.annotation.AnnotatedElementUtils.getMergedAnnotation;
 import static org.springframework.util.ClassUtils.getShortName;
 
-public final class GRpcClientProxy implements MethodInterceptor, Reloadable {
+@SuppressWarnings("rawtypes")
+public final class GRpcClientProxy implements BuddyEnhancer.Delegate, Reloadable {
 
     Class clazz;
     Factory factory;
@@ -52,12 +52,9 @@ public final class GRpcClientProxy implements MethodInterceptor, Reloadable {
     }
 
     @Override
-    public Object intercept(Object o, Method method, Object[] args,
-                            MethodProxy methodProxy) throws Throwable {
-        if (method.getDeclaringClass().equals(GRpcClientDummy.class)) {
-            return methodProxy.invokeSuper(o, args);
-        }
-
+    public Object invoke(BuddyEnhancer.Invocation invocation) throws Exception {
+        val method = invocation.getMethod();
+        val args = invocation.getArguments();
         if (method.getDeclaringClass().equals(Reloadable.class)) {
             return method.invoke(this, args);
         }

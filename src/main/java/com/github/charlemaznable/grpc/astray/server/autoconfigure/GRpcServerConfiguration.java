@@ -1,5 +1,6 @@
 package com.github.charlemaznable.grpc.astray.server.autoconfigure;
 
+import com.github.charlemaznable.gentle.spring.factory.AutoConfigurationImport;
 import com.github.charlemaznable.gentle.spring.factory.SpringFactory;
 import com.github.charlemaznable.grpc.astray.server.GRpcService;
 import com.github.charlemaznable.grpc.astray.server.invocation.GRpcInvocationConfiguration;
@@ -14,6 +15,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -25,16 +27,18 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.function.Consumer;
 
-@SuppressWarnings({"SpringJavaInjectionPointsAutowiringInspection", "SpringFacetCodeInspection"})
+@SuppressWarnings({"SpringFacetCodeInspection", "rawtypes"})
 @Configuration
 @Import({
         GRpcInvocationConfiguration.class,
         GRpcValidationConfiguration.class,
         NettyServerBuilderConfiguration.class,
 })
+@EnableConfigurationProperties(GRpcServerProperties.class)
 @AutoConfigureOrder
 @AutoConfigureAfter(ValidationAutoConfiguration.class)
 @ConditionalOnBean(annotation = GRpcService.class)
+@AutoConfigurationImport
 @SpringFactory(EnableAutoConfiguration.class)
 public class GRpcServerConfiguration {
 
@@ -48,11 +52,6 @@ public class GRpcServerConfiguration {
                                              ServerBuilder serverBuilder) {
         return new GRpcServerRunner(applicationContext, gRpcServerProperties,
                 gRpcServicesRegistry, configurator, serverBuilder);
-    }
-
-    @Bean
-    public GRpcServerProperties gRpcServerProperties() {
-        return new GRpcServerProperties();
     }
 
     @Bean
@@ -85,16 +84,13 @@ public class GRpcServerConfiguration {
             val chunks = source.split(":");
             int port;
             switch (chunks.length) {
-                case 1:
-                    port = GRpcServerProperties.DEFAULT_GRPC_PORT;
-                    break;
-                case 2:
+                case 1 -> port = GRpcServerProperties.DEFAULT_GRPC_PORT;
+                case 2 -> {
                     port = Integer.parseInt(chunks[1]);
                     if (port < 1)
                         throw new IllegalArgumentException(source + " socket address port is illegal");
-                    break;
-                default:
-                    throw new IllegalArgumentException(source + " can't be converted to socket address");
+                }
+                default -> throw new IllegalArgumentException(source + " can't be converted to socket address");
             }
             return new InetSocketAddress(chunks[0], port);
         }

@@ -1,5 +1,6 @@
 package com.github.charlemaznable.grpc.astray.server.autoconfigure;
 
+import jakarta.annotation.PostConstruct;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +8,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.util.unit.DataSize;
 
-import javax.annotation.PostConstruct;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.List;

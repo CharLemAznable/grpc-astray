@@ -89,7 +89,6 @@ public abstract class GRpcAstrayMarshaller implements Marshaller<Object> {
             return bytes(gson.toJson(obj));
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public Object decode(byte[] bytes) {
             val string = string(bytes);

@@ -82,13 +82,12 @@ final class GRpcHandlerMethodResolver {
 
         val privateHandler = Optional.ofNullable(privateResolvers)
                 .map(r -> r.get(grpcServiceName))
-                .<Pair<GRpcExceptionHandlerMethod, Throwable>>flatMap(r ->
-                        r.resolveMethodByThrowable(grpcServiceName, exception));
+                .flatMap(r -> r.resolveMethodByThrowable(grpcServiceName, exception));
         if (privateHandler.isPresent()) return privateHandler;
 
         val cacheHandlerOptional = get(lookupExceptionCache, exception.getClass());
-        return cacheHandlerOptional.map(cacheHandler -> Optional.of(Pair.of(cacheHandler, exception)))
-                .orElseGet(() -> Optional.ofNullable(exception.getCause())
+        return cacheHandlerOptional.map(cacheHandler -> Pair.of(cacheHandler, exception))
+                .or(() -> Optional.ofNullable(exception.getCause())
                         .flatMap(cause -> resolveMethodByThrowable(grpcServiceName, cause)));
 
     }
@@ -140,8 +139,8 @@ final class GRpcHandlerMethodResolver {
 
     private static class GRpcHandlerMethodComparator<T> implements Comparator<T> {
 
-        private DepthComparator depthComparator;
-        private Function<T, Class<?>> typeFunction;
+        private final DepthComparator depthComparator;
+        private final Function<T, Class<?>> typeFunction;
 
         public GRpcHandlerMethodComparator(Class<?> invocationType,
                                            Function<T, Class<?>> typeFunction) {

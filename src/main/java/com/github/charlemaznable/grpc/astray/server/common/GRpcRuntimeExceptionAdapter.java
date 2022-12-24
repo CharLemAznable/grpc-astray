@@ -4,11 +4,13 @@ import lombok.Getter;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
+import java.io.Serial;
 import java.util.Optional;
 
 @Getter
 public final class GRpcRuntimeExceptionAdapter extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = 9180289944869848308L;
 
     private final transient Object hint;

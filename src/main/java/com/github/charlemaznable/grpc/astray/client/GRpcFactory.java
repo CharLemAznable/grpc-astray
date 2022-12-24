@@ -1,7 +1,7 @@
 package com.github.charlemaznable.grpc.astray.client;
 
 import com.github.charlemaznable.core.context.FactoryContext;
-import com.github.charlemaznable.core.lang.EasyEnhancer;
+import com.github.charlemaznable.core.lang.BuddyEnhancer;
 import com.github.charlemaznable.core.lang.Factory;
 import com.github.charlemaznable.core.lang.Reloadable;
 import com.github.charlemaznable.grpc.astray.client.enhancer.GRpcClientEnhancer;
@@ -10,8 +10,6 @@ import com.github.charlemaznable.grpc.astray.client.internal.GRpcClientProxy;
 import com.google.common.cache.LoadingCache;
 import lombok.NoArgsConstructor;
 import lombok.val;
-import net.sf.cglib.proxy.Callback;
-import net.sf.cglib.proxy.NoOp;
 
 import javax.annotation.Nonnull;
 import java.util.Comparator;
@@ -30,9 +28,9 @@ import static lombok.AccessLevel.PRIVATE;
 @NoArgsConstructor(access = PRIVATE)
 public final class GRpcFactory {
 
-    private static LoadingCache<Factory, GRpcLoader> loaderCache
+    private static final LoadingCache<Factory, GRpcLoader> loaderCache
             = simpleCache(from(GRpcLoader::new));
-    private static List<GRpcClientEnhancer> enhancers;
+    private static final List<GRpcClientEnhancer> enhancers;
 
     static {
         enhancers = StreamSupport
@@ -56,8 +54,8 @@ public final class GRpcFactory {
     @SuppressWarnings("unchecked")
     public static class GRpcLoader {
 
-        private Factory factory;
-        private LoadingCache<Class, Object> cache
+        private final Factory factory;
+        private final LoadingCache<Class<?>, Object> cache
                 = simpleCache(from(this::loadClient));
 
         GRpcLoader(Factory factory) {
@@ -72,15 +70,19 @@ public final class GRpcFactory {
         private <T> Object loadClient(@Nonnull Class<T> clazz) {
             ensureClassIsAnInterface(clazz);
             return wrapWithEnhancer(clazz,
-                    EasyEnhancer.create(GRpcClientDummy.class,
+                    BuddyEnhancer.create(GRpcClientDummy.class,
+                            new Object[]{clazz},
                             new Class[]{clazz, Reloadable.class},
-                            method -> {
-                                if (method.isDefault()) return 1;
+                            invocation -> {
+                                if (invocation.getMethod().isDefault() ||
+                                        invocation.getMethod().getDeclaringClass()
+                                                .equals(GRpcClientDummy.class)) return 1;
                                 return 0;
-                            }, new Callback[]{
+                            },
+                            new BuddyEnhancer.Delegate[]{
                                     new GRpcClientProxy(clazz, factory),
-                                    NoOp.INSTANCE
-                            }, new Object[]{clazz}));
+                                    BuddyEnhancer.CALL_SUPER
+                            }));
         }
 
         private <T> void ensureClassIsAnInterface(Class<T> clazz) {
@@ -92,10 +94,7 @@ public final class GRpcFactory {
             Object enhancedImpl = impl;
             for (val enhancer : enhancers) {
                 if (enhancer.isEnabled(clazz)) {
-                    enhancedImpl = EasyEnhancer.create(GRpcClientDummy.class,
-                            new Class[]{clazz, Reloadable.class},
-                            enhancer.build(clazz, enhancedImpl),
-                            new Object[]{clazz});
+                    enhancedImpl = enhancer.build(clazz, enhancedImpl);
                 }
             }
             return enhancedImpl;

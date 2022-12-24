@@ -7,6 +7,8 @@ import com.github.charlemaznable.grpc.astray.server.invocation.exception.Conditi
 import com.github.charlemaznable.grpc.astray.server.invocation.exception.GRpcExceptionScope;
 import com.github.charlemaznable.grpc.astray.server.invocation.handle.GRpcHandlingSupport;
 import io.grpc.Status;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -14,9 +16,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
 
 @SuppressWarnings({"SpringJavaInjectionPointsAutowiringInspection", "SpringFacetCodeInspection"})
 @Configuration

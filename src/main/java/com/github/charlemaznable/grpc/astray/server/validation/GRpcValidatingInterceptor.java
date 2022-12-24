@@ -11,12 +11,12 @@ import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import io.grpc.Status;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import lombok.Getter;
 import lombok.val;
 import org.springframework.core.Ordered;
 
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
 import java.util.Optional;
 
 import static com.github.charlemaznable.core.lang.Condition.checkEmptyRun;
@@ -40,7 +40,7 @@ final class GRpcValidatingInterceptor implements ServerInterceptor, Ordered {
     @Override
     public <Q, R> ServerCall.Listener<Q> interceptCall(ServerCall<Q, R> call, Metadata headers,
                                                        ServerCallHandler<Q, R> next) {
-        val validationServerCall = new ForwardingServerCall.SimpleForwardingServerCall<Q, R>(call) {
+        val validationServerCall = new ForwardingServerCall.SimpleForwardingServerCall<>(call) {
 
             @Override
             public void sendMessage(R message) {
@@ -54,7 +54,7 @@ final class GRpcValidatingInterceptor implements ServerInterceptor, Ordered {
 
         ServerCall.Listener<Q> listener = next.startCall(validationServerCall, headers);
 
-        return new MessageBlockingServerCallListener<Q>(listener) {
+        return new MessageBlockingServerCallListener<>(listener) {
 
             @Override
             public void onMessage(Q message) {

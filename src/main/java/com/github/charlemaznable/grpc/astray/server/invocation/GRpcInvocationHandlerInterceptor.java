@@ -34,7 +34,7 @@ final class GRpcInvocationHandlerInterceptor implements ServerInterceptor, Order
     public <Q, R> ServerCall.Listener<Q> interceptCall(ServerCall<Q, R> call, Metadata headers,
                                                        ServerCallHandler<Q, R> next) {
         val callIsClosed = new AtomicBoolean(false);
-        val serverCall = new ForwardingServerCall.SimpleForwardingServerCall<Q, R>(call) {
+        val serverCall = new ForwardingServerCall.SimpleForwardingServerCall<>(call) {
 
             private R response;
 
@@ -64,10 +64,10 @@ final class GRpcInvocationHandlerInterceptor implements ServerInterceptor, Order
             listener = next.startCall(serverCall, headers);
         } catch (RuntimeException e) {
             handlingSupport.handleException(e, serverCall, headers);
-            return new ServerCall.Listener<Q>() {};
+            return new ServerCall.Listener<>() {};
         }
 
-        return new MessageBlockingServerCallListener<Q>(listener) {
+        return new MessageBlockingServerCallListener<>(listener) {
 
             private Q request;
 
