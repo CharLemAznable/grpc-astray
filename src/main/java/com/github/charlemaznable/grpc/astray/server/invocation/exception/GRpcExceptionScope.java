@@ -13,6 +13,8 @@ import java.util.Optional;
 @Getter
 public final class GRpcExceptionScope {
 
+    public static class GRpcExceptionScopeBuilder {}
+
     private MethodDescriptor<?, ?> methodDescriptor;
     private Attributes methodCallAttributes;
     private Metadata callHeaders;
