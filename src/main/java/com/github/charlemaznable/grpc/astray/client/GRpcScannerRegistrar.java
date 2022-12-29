@@ -9,7 +9,7 @@ import static com.github.charlemaznable.grpc.astray.client.GRpcFactory.springGRp
 
 public final class GRpcScannerRegistrar extends SpringScannerRegistrar {
 
-    private static GRpcLoader springGRpcLoader = springGRpcLoader();
+    private static final GRpcLoader springGRpcLoader = springGRpcLoader();
 
     public GRpcScannerRegistrar() {
         super(GRpcScan.class, GRpcClientFactoryBean.class, GRpcClient.class);

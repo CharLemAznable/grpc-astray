@@ -107,13 +107,13 @@ public final class GRpcServicesRegistry implements InitializingBean, Application
             return builder.build();
         }
 
-        private static String checkGRpcServiceName(Class clazz) {
+        private static String checkGRpcServiceName(Class<?> clazz) {
             val grpcServiceAnno = getMergedAnnotation(clazz, GRpcService.class);
             Assert.notNull(grpcServiceAnno, () -> clazz.getName() + " has no GRpcService annotation");
             return blankThen(grpcServiceAnno.value(), () -> getShortName(clazz));
         }
 
-        private static Map<Method, MethodDescriptor<Object, Object>> checkGRpcServiceMethods(Class clazz,
+        private static Map<Method, MethodDescriptor<Object, Object>> checkGRpcServiceMethods(Class<?> clazz,
                                                                                              String grpcServiceName) {
             val result = Mapp.<Method, MethodDescriptor<Object, Object>>newHashMap();
             val clazzMethods = clazz.getDeclaredMethods();

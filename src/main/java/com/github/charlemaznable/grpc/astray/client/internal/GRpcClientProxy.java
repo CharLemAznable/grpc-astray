@@ -34,6 +34,7 @@ import static lombok.AccessLevel.PRIVATE;
 import static org.springframework.core.annotation.AnnotatedElementUtils.getMergedAnnotation;
 import static org.springframework.util.ClassUtils.getShortName;
 
+@SuppressWarnings("rawtypes")
 public final class GRpcClientProxy implements MethodInterceptor, Reloadable {
 
     Class clazz;
@@ -54,10 +55,6 @@ public final class GRpcClientProxy implements MethodInterceptor, Reloadable {
     @Override
     public Object intercept(Object o, Method method, Object[] args,
                             MethodProxy methodProxy) throws Throwable {
-        if (method.getDeclaringClass().equals(GRpcClientDummy.class)) {
-            return methodProxy.invokeSuper(o, args);
-        }
-
         if (method.getDeclaringClass().equals(Reloadable.class)) {
             return method.invoke(this, args);
         }

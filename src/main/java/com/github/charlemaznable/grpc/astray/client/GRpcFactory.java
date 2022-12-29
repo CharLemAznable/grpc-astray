@@ -30,9 +30,9 @@ import static lombok.AccessLevel.PRIVATE;
 @NoArgsConstructor(access = PRIVATE)
 public final class GRpcFactory {
 
-    private static LoadingCache<Factory, GRpcLoader> loaderCache
+    private static final LoadingCache<Factory, GRpcLoader> loaderCache
             = simpleCache(from(GRpcLoader::new));
-    private static List<GRpcClientEnhancer> enhancers;
+    private static final List<GRpcClientEnhancer> enhancers;
 
     static {
         enhancers = StreamSupport
@@ -56,8 +56,8 @@ public final class GRpcFactory {
     @SuppressWarnings("unchecked")
     public static class GRpcLoader {
 
-        private Factory factory;
-        private LoadingCache<Class, Object> cache
+        private final Factory factory;
+        private final LoadingCache<Class<?>, Object> cache
                 = simpleCache(from(this::loadClient));
 
         GRpcLoader(Factory factory) {
@@ -75,7 +75,8 @@ public final class GRpcFactory {
                     EasyEnhancer.create(GRpcClientDummy.class,
                             new Class[]{clazz, Reloadable.class},
                             method -> {
-                                if (method.isDefault()) return 1;
+                                if (method.isDefault() || method.getDeclaringClass()
+                                        .equals(GRpcClientDummy.class)) return 1;
                                 return 0;
                             }, new Callback[]{
                                     new GRpcClientProxy(clazz, factory),
@@ -92,10 +93,7 @@ public final class GRpcFactory {
             Object enhancedImpl = impl;
             for (val enhancer : enhancers) {
                 if (enhancer.isEnabled(clazz)) {
-                    enhancedImpl = EasyEnhancer.create(GRpcClientDummy.class,
-                            new Class[]{clazz, Reloadable.class},
-                            enhancer.build(clazz, enhancedImpl),
-                            new Object[]{clazz});
+                    enhancedImpl = enhancer.build(clazz, enhancedImpl);
                 }
             }
             return enhancedImpl;

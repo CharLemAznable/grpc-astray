@@ -3,7 +3,6 @@ package com.github.charlemaznable.grpc.astray.server.invocation.handle;
 import com.github.charlemaznable.grpc.astray.server.autoconfigure.GRpcServicesRegistry;
 import com.github.charlemaznable.grpc.astray.server.common.GRpcRuntimeExceptionAdapter;
 import com.github.charlemaznable.grpc.astray.server.invocation.exception.GRpcExceptionScope;
-import com.github.charlemaznable.grpc.astray.server.invocation.exception.GRpcExceptionScope.GRpcExceptionScopeBuilder;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.Status;
@@ -52,7 +51,7 @@ public final class GRpcHandlingSupport {
     }
 
     public <Q, R> void handleException(RuntimeException e, ServerCall<Q, R> call, Metadata headers,
-                                       Consumer<GRpcExceptionScopeBuilder> customizer) {
+                                       Consumer<GRpcExceptionScope.GRpcExceptionScopeBuilder> customizer) {
         Status statusToSend = Status.INTERNAL;
         Metadata trailersToSend = null;
         R responseToSend = null;

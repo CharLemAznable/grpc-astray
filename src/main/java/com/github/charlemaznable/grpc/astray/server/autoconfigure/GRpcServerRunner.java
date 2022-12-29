@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import static com.github.charlemaznable.core.lang.Condition.checkNotNull;
 
+@SuppressWarnings("rawtypes")
 @Slf4j(topic = "grpc.astray.server")
 @RequiredArgsConstructor
 public final class GRpcServerRunner implements SmartLifecycle {
@@ -52,7 +53,7 @@ public final class GRpcServerRunner implements SmartLifecycle {
                 val gRpcServiceAnno = applicationContext.findAnnotationOnBean(name, GRpcService.class);
                 serverBuilder.addService(bindInterceptors(
                         serviceWrapper.getServiceDefinition(), gRpcServiceAnno, globalInterceptors));
-                log.info("\'{}\' service has been registered.",
+                log.info("'{}' service has been registered.",
                         serviceWrapper.getServiceDefinition().getServiceDescriptor().getName());
             });
             configurator.accept(serverBuilder);
@@ -120,10 +121,11 @@ public final class GRpcServerRunner implements SmartLifecycle {
                                                      Collection<ServerInterceptor> globalInterceptors) {
         checkNotNull(gRpcServiceAnno);
         val privateInterceptors = Stream.of(gRpcServiceAnno.interceptors())
-                .<ServerInterceptor>map(interceptorClass -> {
+                .map(interceptorClass -> {
                     try {
                         return 0 < applicationContext.getBeanNamesForType(interceptorClass).length
-                                ? applicationContext.getBean(interceptorClass) : interceptorClass.newInstance();
+                                ? applicationContext.getBean(interceptorClass)
+                                : interceptorClass.getConstructor().newInstance();
                     } catch (Exception e) {
                         throw new BeanCreationException("Failed to create interceptor instance.", e);
                     }

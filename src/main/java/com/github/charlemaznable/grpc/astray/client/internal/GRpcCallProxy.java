@@ -58,11 +58,11 @@ public final class GRpcCallProxy {
             // 返回Future类型, 则多处理一层泛型
             val futureTypeArgument = actualTypeArguments[0];
             if (!(futureTypeArgument instanceof ParameterizedType)) {
-                this.returnType = (Class) futureTypeArgument;
+                this.returnType = (Class<?>) futureTypeArgument;
                 return;
             }
             parameterizedType = (ParameterizedType) futureTypeArgument;
-            rt = (Class) parameterizedType.getRawType();
+            rt = (Class<?>) parameterizedType.getRawType();
         }
         this.returnType = rt;
     }
