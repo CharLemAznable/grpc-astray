@@ -22,8 +22,9 @@ public final class GRpcScannerRegistrar extends SpringScannerRegistrar {
 
     public static class GRpcClientFactoryBean extends SpringFactoryBean {
 
-        public GRpcClientFactoryBean() {
-            super(springGRpcLoader::getClient);
+        @Override
+        public Object buildObject(Class<?> xyzInterface) {
+            return springGRpcLoader.getClient(xyzInterface);
         }
     }
 }
