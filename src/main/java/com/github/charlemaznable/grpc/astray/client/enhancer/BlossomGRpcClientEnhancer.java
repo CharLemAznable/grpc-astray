@@ -13,7 +13,7 @@ public final class BlossomGRpcClientEnhancer implements GRpcClientEnhancer {
 
     @Override
     public boolean isEnabled(Class<?> clientClass) {
-        return ClzPath.classExists("blossom.buddy.BlossomBuddyInterceptor")
+        return ClzPath.classExists("blossom.enhance.BlossomBuddyInterceptor")
                 && BlossomElf.isFastBlossomAnnotated(clientClass);
     }
 

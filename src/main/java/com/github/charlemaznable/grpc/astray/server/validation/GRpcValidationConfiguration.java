@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-@SuppressWarnings({"SpringJavaInjectionPointsAutowiringInspection", "SpringFacetCodeInspection"})
+@SuppressWarnings({"SpringJavaInjectionPointsAutowiringInspection"})
 @Configuration
 @ConditionalOnBean(Validator.class)
 @EnableConfigurationProperties(GRpcValidationProperties.class)

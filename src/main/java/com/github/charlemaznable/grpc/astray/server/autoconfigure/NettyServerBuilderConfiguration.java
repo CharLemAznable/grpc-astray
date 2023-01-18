@@ -23,7 +23,7 @@ import java.util.function.IntFunction;
 import static com.github.charlemaznable.core.lang.ClzPath.classExists;
 import static org.joor.Reflect.on;
 
-@SuppressWarnings({"SpringJavaInjectionPointsAutowiringInspection", "SpringFacetCodeInspection", "rawtypes"})
+@SuppressWarnings({"rawtypes"})
 @Configuration
 @ConditionalOnGRpcServerEnabled
 public class NettyServerBuilderConfiguration implements EnvironmentAware {

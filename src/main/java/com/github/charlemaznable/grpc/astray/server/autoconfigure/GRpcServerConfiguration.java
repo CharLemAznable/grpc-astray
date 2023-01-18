@@ -27,7 +27,7 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.function.Consumer;
 
-@SuppressWarnings({"SpringFacetCodeInspection", "rawtypes"})
+@SuppressWarnings({"rawtypes"})
 @Configuration
 @Import({
         GRpcInvocationConfiguration.class,
