@@ -23,6 +23,7 @@ public final class GRpcScannerRegistrar extends SpringScannerRegistrar {
         return classMetadata.isInterface();
     }
 
+    @Override
     protected void postProcessBeanDefinition(BeanDefinition beanDefinition) {
         super.postProcessBeanDefinition(beanDefinition);
         beanDefinition.getPropertyValues().add("loader", this.loader);
