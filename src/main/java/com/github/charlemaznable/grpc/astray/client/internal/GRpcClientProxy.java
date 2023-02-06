@@ -86,7 +86,7 @@ public final class GRpcClientProxy implements BuddyEnhancer.Delegate, Reloadable
         this.configurer = Elf.checkConfigurer(this.clazz, this.factory);
         this.channelBuilder = nullThen(Elf.checkChannelBuilder(this.configurer), () ->
                 s -> (Channel) ManagedChannelBuilder.forTarget(s).usePlaintext().build());
-        this.channelList = checkNotEmpty(Elf.checkChannelTargets(this.configurer, this.clazz, this.factory),
+        this.channelList = checkNotEmpty(Elf.checkChannelTargets(this.configurer, this.clazz),
                 new GRpcClientException(this.clazz.getName() + " channel config is empty"))
                 .stream().map(this.channelBuilder).toList();
         this.channelBalancer = nullThen(Elf.checkChannelBalancer(
@@ -126,7 +126,7 @@ public final class GRpcClientProxy implements BuddyEnhancer.Delegate, Reloadable
                     ? builderConfigurer.channelBuilder() : null;
         }
 
-        static List<String> checkChannelTargets(GRpcConfigurer configurer, Class clazz, Factory factory) {
+        static List<String> checkChannelTargets(GRpcConfigurer configurer, Class clazz) {
             if (configurer instanceof GRpcChannelConfigurer channelConfigurer)
                 return newArrayList(channelConfigurer.targets())
                         .stream().map(GRpcClientDummy::substitute).toList();
