@@ -6,10 +6,13 @@ import com.github.charlemaznable.grpc.astray.client.GRpcChannel;
 import com.github.charlemaznable.grpc.astray.client.GRpcChannelBalance;
 import com.github.charlemaznable.grpc.astray.client.GRpcChannelBalance.RoundRobinBalancer;
 import com.github.charlemaznable.grpc.astray.client.GRpcClient;
+import com.github.charlemaznable.grpc.astray.client.GRpcConfigurerWith;
+import com.github.charlemaznable.grpc.astray.client.configurer.GRpcCommonConfig;
 
 @GRpcClient("Simple")
 @GRpcChannel({"127.0.0.1:7018", "127.0.0.1:7019", "127.0.0.1:7020"})
 @GRpcChannelBalance(RoundRobinBalancer.class)
+@GRpcConfigurerWith(GRpcCommonConfig.class) // test for ConfigFactory load error
 public interface SimpleClient {
 
     String testString(String req);

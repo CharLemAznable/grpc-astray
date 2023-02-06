@@ -1,6 +1,6 @@
 package com.github.charlemaznable.grpc.astray.client;
 
-import org.springframework.core.annotation.AliasFor;
+import com.github.charlemaznable.grpc.astray.client.configurer.GRpcConfigurer;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -13,11 +13,7 @@ import java.lang.annotation.Target;
 @Inherited
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface GRpcChannel {
+public @interface GRpcConfigurerWith {
 
-    @AliasFor("targets")
-    String[] value() default "";
-
-    @AliasFor("value")
-    String[] targets() default "";
+    Class<? extends GRpcConfigurer> value();
 }

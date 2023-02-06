@@ -1,6 +1,5 @@
 package com.github.charlemaznable.grpc.astray.test.common;
 
-import com.github.charlemaznable.grpc.astray.client.GRpcChannel.ChannelProvider;
 import io.grpc.ServerBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +21,7 @@ public class EmbeddedServerConfig {
     }
 
     @Bean
-    public ChannelProvider embeddedChannelProvider() {
-        return new EmbeddedChannelProvider(embeddedServerName);
+    public EmbeddedChannelConfigurer embeddedChannelConfigurer() {
+        return new EmbeddedChannelConfigurer(embeddedServerName);
     }
 }
