@@ -7,7 +7,7 @@ import com.github.charlemaznable.grpc.astray.client.GRpcChannelBalance;
 import com.github.charlemaznable.grpc.astray.client.GRpcChannelBalance.RoundRobinBalancer;
 import com.github.charlemaznable.grpc.astray.client.GRpcClient;
 import com.github.charlemaznable.grpc.astray.client.GRpcConfigurerWith;
-import com.github.charlemaznable.grpc.astray.client.configurer.GRpcCommonConfig;
+import com.github.charlemaznable.grpc.astray.client.configurer.configservice.GRpcCommonConfig;
 
 @GRpcClient("Simple")
 @GRpcChannel({"127.0.0.1:7018", "127.0.0.1:7019", "127.0.0.1:7020"})

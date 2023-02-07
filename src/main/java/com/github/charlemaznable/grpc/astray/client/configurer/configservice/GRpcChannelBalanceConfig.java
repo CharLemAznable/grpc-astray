@@ -1,27 +1,17 @@
-package com.github.charlemaznable.grpc.astray.client.configurer;
+package com.github.charlemaznable.grpc.astray.client.configurer.configservice;
 
 import com.github.charlemaznable.configservice.Config;
 import com.github.charlemaznable.grpc.astray.client.GRpcChannelBalance;
-import com.google.common.base.Splitter;
+import com.github.charlemaznable.grpc.astray.client.configurer.GRpcChannelBalanceConfigurer;
 
-import java.util.List;
 import java.util.Optional;
 
 import static com.github.charlemaznable.core.lang.Condition.notNullThen;
 
-public interface GRpcCommonConfig extends GRpcChannelConfigurer, GRpcChannelBalanceConfigurer {
-
-    @Config("targets")
-    String targetsString();
+public interface GRpcChannelBalanceConfig extends GRpcChannelBalanceConfigurer {
 
     @Config("channelBalancer")
     String channelBalancerString();
-
-    @Override
-    default List<String> targets() {
-        return notNullThen(targetsString(), v -> Splitter.on(",")
-                .omitEmptyStrings().trimResults().splitToList(v));
-    }
 
     @Override
     default GRpcChannelBalance.ChannelBalancer channelBalancer() {
