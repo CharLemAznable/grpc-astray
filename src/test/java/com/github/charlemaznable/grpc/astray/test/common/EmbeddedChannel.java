@@ -1,6 +1,6 @@
 package com.github.charlemaznable.grpc.astray.test.common;
 
-import com.github.charlemaznable.grpc.astray.client.GRpcChannel;
+import com.github.charlemaznable.grpc.astray.client.GRpcConfigurerWith;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -13,6 +13,6 @@ import java.lang.annotation.Target;
 @Inherited
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@GRpcChannel(channelProvider = EmbeddedChannelProvider.class)
+@GRpcConfigurerWith(EmbeddedChannelConfigurer.class)
 public @interface EmbeddedChannel {
 }

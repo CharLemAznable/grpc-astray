@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Lazy;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 
-@SuppressWarnings({"SpringJavaInjectionPointsAutowiringInspection", "SpringFacetCodeInspection"})
+@SuppressWarnings({"SpringJavaInjectionPointsAutowiringInspection"})
 @Configuration
 @ConditionalOnBean(Validator.class)
 @EnableConfigurationProperties(GRpcValidationProperties.class)
