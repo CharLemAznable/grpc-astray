@@ -2,12 +2,13 @@ package com.github.charlemaznable.grpc.astray.test.simple;
 
 import blossom.Blossom;
 import com.github.bingoohuang.westcache.WestCacheable;
+import com.github.charlemaznable.grpc.astray.client.GRpcCall;
 import com.github.charlemaznable.grpc.astray.client.GRpcChannel;
 import com.github.charlemaznable.grpc.astray.client.GRpcChannelBalance;
 import com.github.charlemaznable.grpc.astray.client.GRpcChannelBalance.RoundRobinBalancer;
 import com.github.charlemaznable.grpc.astray.client.GRpcClient;
-import com.github.charlemaznable.grpc.astray.client.GRpcConfigurerWith;
-import com.github.charlemaznable.grpc.astray.client.configurer.configservice.GRpcCommonConfig;
+
+import java.util.concurrent.Future;
 
 @GRpcClient("Simple")
 @GRpcChannel({"127.0.0.1:7018", "127.0.0.1:7019", "127.0.0.1:7020"})
@@ -37,4 +38,8 @@ public interface SimpleClient {
     @WestCacheable
     @Blossom
     String testCache(String req);
+
+    @WestCacheable
+    @GRpcCall("TestCache")
+    Future<String> testCacheFuture(String req);
 }

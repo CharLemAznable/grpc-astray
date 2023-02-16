@@ -3,6 +3,7 @@ package com.github.charlemaznable.grpc.astray.test.simple;
 import com.github.charlemaznable.grpc.astray.client.GRpcClientException;
 import com.github.charlemaznable.grpc.astray.client.GRpcFactory;
 import com.github.charlemaznable.grpc.astray.test.common.TestApplication;
+import lombok.SneakyThrows;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
 
@@ -25,6 +27,7 @@ public class SimpleTest {
     @Autowired
     private SimpleClient2 client2;
 
+    @SneakyThrows
     @Test
     public void testSimple() {
         assertEquals("response: Hello GRpc, ^_^", client.testString("Hello GRpc"));
@@ -50,10 +53,16 @@ public class SimpleTest {
         val respCache2 = client.testCache("req");
         assertEquals(respCache1, respCache2);
 
+        val respCacheFuture1 = client.testCacheFuture("req-future");
+        val respCacheFuture2 = client.testCacheFuture("req-future");
+        assertNotSame(respCacheFuture1, respCacheFuture2);
+        assertEquals(respCacheFuture1.get(), respCacheFuture2.get());
+
         assertThrows(GRpcClientException.class,
                 () -> GRpcFactory.getClient(ErrorClient.class));
     }
 
+    @SneakyThrows
     @Test
     public void testSimple2() {
         assertEquals("response: Hello GRpc, ^_^", client2.testString("Hello GRpc"));
@@ -78,5 +87,10 @@ public class SimpleTest {
         val respCache1 = client2.testCache("req");
         val respCache2 = client2.testCache("req");
         assertEquals(respCache1, respCache2);
+
+        val respCacheFuture1 = client.testCacheFuture("req-future");
+        val respCacheFuture2 = client.testCacheFuture("req-future");
+        assertNotSame(respCacheFuture1, respCacheFuture2);
+        assertEquals(respCacheFuture1.get(), respCacheFuture2.get());
     }
 }
