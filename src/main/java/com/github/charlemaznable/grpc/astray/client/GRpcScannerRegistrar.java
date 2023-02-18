@@ -4,6 +4,7 @@ import com.github.charlemaznable.core.spring.SpringFactoryBean;
 import com.github.charlemaznable.core.spring.SpringScannerRegistrar;
 import com.github.charlemaznable.grpc.astray.client.GRpcFactory.GRpcLoader;
 import lombok.Setter;
+import lombok.val;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.type.ClassMetadata;
 
@@ -27,6 +28,13 @@ public final class GRpcScannerRegistrar extends SpringScannerRegistrar {
     protected void postProcessBeanDefinition(BeanDefinition beanDefinition) {
         super.postProcessBeanDefinition(beanDefinition);
         beanDefinition.getPropertyValues().add("loader", this.loader);
+    }
+
+    public static GRpcClientFactoryBean buildFactoryBean(Class<?> xyzInterface) {
+        val factoryBean = new GRpcClientFactoryBean();
+        factoryBean.setXyzInterface(xyzInterface);
+        factoryBean.setLoader(springGRpcLoader());
+        return factoryBean;
     }
 
     public static class GRpcClientFactoryBean extends SpringFactoryBean {
