@@ -22,11 +22,7 @@ import static java.util.concurrent.Executors.newCachedThreadPool;
 @AutoService(GRpcClientEnhancer.class)
 public final class WestCacheableGRpcClientEnhancer implements GRpcClientEnhancer {
 
-    static final ExecutorService cacheExecutorService;
-
-    static {
-        cacheExecutorService = newCachedThreadPool();
-    }
+    static final ExecutorService cacheExecutorService = newCachedThreadPool();
 
     @Override
     public boolean isEnabled(Class<?> clientClass) {
