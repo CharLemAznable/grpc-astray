@@ -1,4 +1,7 @@
 package com.github.charlemaznable.grpc.astray.client.configurer.configservice;
 
-public interface GRpcCommonConfig extends GRpcChannelConfig, GRpcChannelBalanceConfig {
+import com.github.charlemaznable.grpc.astray.client.configurer.GRpcInitializationConfigurer;
+
+public interface GRpcCommonConfig extends GRpcInitializationConfigurer,
+        GRpcChannelConfig, GRpcChannelBalanceConfig {
 }

@@ -1,7 +1,6 @@
 package com.github.charlemaznable.grpc.astray.client.enhancer;
 
 import com.github.bingoohuang.westcache.cglib.CacheMethodInterceptor;
-import com.github.bingoohuang.westcache.cglib.CglibCacheMethodInterceptor;
 import com.github.bingoohuang.westcache.utils.Anns;
 import com.github.bingoohuang.westcache.utils.WestCacheOption;
 import com.github.charlemaznable.core.lang.ClzPath;
@@ -25,11 +24,7 @@ import static java.util.concurrent.Executors.newCachedThreadPool;
 @AutoService(GRpcClientEnhancer.class)
 public final class WestCacheableGRpcClientEnhancer implements GRpcClientEnhancer {
 
-    static final ExecutorService cacheExecutorService;
-
-    static {
-        cacheExecutorService = newCachedThreadPool();
-    }
+    static final ExecutorService cacheExecutorService = newCachedThreadPool();
 
     @Override
     public boolean isEnabled(Class<?> clientClass) {
