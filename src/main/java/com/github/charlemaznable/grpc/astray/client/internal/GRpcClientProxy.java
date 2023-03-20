@@ -15,6 +15,7 @@ import com.github.charlemaznable.grpc.astray.client.configurer.GRpcChannelBalanc
 import com.github.charlemaznable.grpc.astray.client.configurer.GRpcChannelBuilderConfigurer;
 import com.github.charlemaznable.grpc.astray.client.configurer.GRpcChannelConfigurer;
 import com.github.charlemaznable.grpc.astray.client.configurer.GRpcConfigurer;
+import com.github.charlemaznable.grpc.astray.client.configurer.GRpcInitializationConfigurer;
 import com.google.common.cache.LoadingCache;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
@@ -84,6 +85,7 @@ public final class GRpcClientProxy implements BuddyEnhancer.Delegate, Reloadable
     private void initialize() {
         this.serviceName = Elf.checkGRpcServiceName(this.clazz);
         this.configurer = Elf.checkConfigurer(this.clazz, this.factory);
+        Elf.setUpBeforeInitialization(this.configurer, this.clazz);
         this.channelBuilder = nullThen(Elf.checkChannelBuilder(this.configurer), () ->
                 s -> (Channel) ManagedChannelBuilder.forTarget(s).usePlaintext().build());
         this.channelList = checkNotEmpty(Elf.checkChannelTargets(this.configurer, this.clazz),
@@ -91,6 +93,7 @@ public final class GRpcClientProxy implements BuddyEnhancer.Delegate, Reloadable
                 .stream().map(this.channelBuilder).toList();
         this.channelBalancer = nullThen(Elf.checkChannelBalancer(
                 this.configurer, this.clazz, this.factory), GRpcChannelBalance.RandomBalancer::new);
+        Elf.tearDownAfterInitialization(this.configurer, this.clazz);
     }
 
     private GRpcCallProxy loadCallProxy(Method method) {
@@ -121,6 +124,14 @@ public final class GRpcClientProxy implements BuddyEnhancer.Delegate, Reloadable
             }
         }
 
+        static void setUpBeforeInitialization(GRpcConfigurer configurer, Class clazz) {
+            if (configurer instanceof GRpcInitializationConfigurer initializationConfigurer) {
+                initializationConfigurer.setUpBeforeInitialization(clazz);
+            } else {
+                GRpcInitializationConfigurer.INSTANCE.setUpBeforeInitialization(clazz);
+            }
+        }
+
         static Function<String, Channel> checkChannelBuilder(GRpcConfigurer configurer) {
             return configurer instanceof GRpcChannelBuilderConfigurer builderConfigurer
                     ? builderConfigurer.channelBuilder() : null;
@@ -140,6 +151,14 @@ public final class GRpcClientProxy implements BuddyEnhancer.Delegate, Reloadable
                 return channelBalanceConfigurer.channelBalancer();
             val channelBalance = getMergedAnnotation(clazz, GRpcChannelBalance.class);
             return notNullThen(channelBalance, anno -> FactoryContext.build(factory, anno.value()));
+        }
+
+        static void tearDownAfterInitialization(GRpcConfigurer configurer, Class clazz) {
+            if (configurer instanceof GRpcInitializationConfigurer initializationConfigurer) {
+                initializationConfigurer.tearDownAfterInitialization(clazz);
+            } else {
+                GRpcInitializationConfigurer.INSTANCE.tearDownAfterInitialization(clazz);
+            }
         }
     }
 }
