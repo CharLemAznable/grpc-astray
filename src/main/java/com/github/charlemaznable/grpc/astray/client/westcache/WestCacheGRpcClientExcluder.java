@@ -1,4 +1,4 @@
-package com.github.charlemaznable.grpc.astray.client.enhancer;
+package com.github.charlemaznable.grpc.astray.client.westcache;
 
 import com.github.bingoohuang.westcache.spring.exclude.WestCacheExcludeAnnotationTypeSupplier;
 import com.github.charlemaznable.grpc.astray.client.GRpcClient;
@@ -10,7 +10,7 @@ import java.util.List;
 import static com.github.charlemaznable.core.lang.Listt.newArrayList;
 
 @AutoService(WestCacheExcludeAnnotationTypeSupplier.class)
-public final class WestCacheableGRpcClientExcluder implements WestCacheExcludeAnnotationTypeSupplier {
+public final class WestCacheGRpcClientExcluder implements WestCacheExcludeAnnotationTypeSupplier {
 
     @Override
     public List<Class<? extends Annotation>> get() {

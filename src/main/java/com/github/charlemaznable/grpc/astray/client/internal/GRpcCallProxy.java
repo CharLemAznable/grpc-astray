@@ -2,11 +2,14 @@ package com.github.charlemaznable.grpc.astray.client.internal;
 
 import com.github.charlemaznable.grpc.astray.client.GRpcCall;
 import com.github.charlemaznable.grpc.astray.client.GRpcClientException;
+import com.github.charlemaznable.grpc.astray.client.elf.CallOptionsConfigElf;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.MethodDescriptor;
 import io.grpc.MethodDescriptor.MethodType;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import lombok.val;
 
 import java.lang.reflect.Method;
@@ -26,13 +29,19 @@ import static org.springframework.util.StringUtils.capitalize;
 
 public final class GRpcCallProxy {
 
+    @Getter
+    @Accessors(fluent = true)
     Method method;
+    @Getter
+    @Accessors(fluent = true)
+    GRpcClientProxy proxy;
     boolean returnFuture; // Future<V>
     Class<?> returnType;
     MethodDescriptor<Object, Object> methodDescriptor;
 
     public GRpcCallProxy(Method method, GRpcClientProxy proxy) {
         this.method = method;
+        this.proxy = proxy;
         processReturnType(this.method);
         this.methodDescriptor = Elf.checkGRpcMethodDescriptor(
                 this.method, proxy, this.returnType);
@@ -68,12 +77,13 @@ public final class GRpcCallProxy {
 
     Object execute(Channel channel, Object[] args) {
         if (isNull(this.methodDescriptor) || 1 != args.length) return null;
+        val callOptions = CallOptionsConfigElf.configCallOptions(CallOptions.DEFAULT, this, args);
         if (this.returnFuture) {
             return futureUnaryCall(channel.newCall(
-                    this.methodDescriptor, CallOptions.DEFAULT), args[0]);
+                    this.methodDescriptor, callOptions), args[0]);
         }
         return blockingUnaryCall(channel,
-                this.methodDescriptor, CallOptions.DEFAULT, args[0]);
+                this.methodDescriptor, callOptions, args[0]);
     }
 
     @NoArgsConstructor(access = PRIVATE)

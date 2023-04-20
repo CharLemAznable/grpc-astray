@@ -16,6 +16,7 @@ import com.github.charlemaznable.grpc.astray.client.configurer.GRpcChannelBuilde
 import com.github.charlemaznable.grpc.astray.client.configurer.GRpcChannelConfigurer;
 import com.github.charlemaznable.grpc.astray.client.configurer.GRpcConfigurer;
 import com.github.charlemaznable.grpc.astray.client.configurer.GRpcInitializationConfigurer;
+import com.github.charlemaznable.grpc.astray.client.elf.GlobalChannelProcessElf;
 import com.google.common.cache.LoadingCache;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
@@ -90,7 +91,7 @@ public final class GRpcClientProxy implements BuddyEnhancer.Delegate, Reloadable
                 s -> (Channel) ManagedChannelBuilder.forTarget(s).usePlaintext().build());
         this.channelList = checkNotEmpty(Elf.checkChannelTargets(this.configurer, this.clazz),
                 new GRpcClientException(this.clazz.getName() + " channel config is empty"))
-                .stream().map(this.channelBuilder).toList();
+                .stream().map(this.channelBuilder).map(GlobalChannelProcessElf::process).toList();
         this.channelBalancer = nullThen(Elf.checkChannelBalancer(
                 this.configurer, this.clazz, this.factory), GRpcChannelBalance.RandomBalancer::new);
         Elf.tearDownAfterInitialization(this.configurer, this.clazz);
