@@ -40,4 +40,16 @@ public interface SimpleClient {
     @WestCacheable
     @GRpcCall("TestCache")
     Future<String> testCacheFuture(String req);
+
+    @WestCacheable
+    @GRpcCall("TestCache")
+    rx.Single<String> testCacheRx(String req);
+
+    @WestCacheable
+    @GRpcCall("TestCache")
+    io.reactivex.Single<String> testCacheRx2(String req);
+
+    @WestCacheable
+    @GRpcCall("TestCache")
+    io.reactivex.rxjava3.core.Single<String> testCacheRx3(String req);
 }

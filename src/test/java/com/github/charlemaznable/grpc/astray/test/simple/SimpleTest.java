@@ -3,16 +3,22 @@ package com.github.charlemaznable.grpc.astray.test.simple;
 import com.github.charlemaznable.grpc.astray.client.GRpcClientException;
 import com.github.charlemaznable.grpc.astray.client.GRpcFactory;
 import com.github.charlemaznable.grpc.astray.test.common.TestApplication;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
 
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
@@ -27,6 +33,7 @@ public class SimpleTest {
     @Autowired
     private SimpleClient2 client2;
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @SneakyThrows
     @Test
     public void testSimple() {
@@ -57,6 +64,61 @@ public class SimpleTest {
         val respCacheFuture2 = client.testCacheFuture("req-future");
         assertNotSame(respCacheFuture1, respCacheFuture2);
         assertEquals(respCacheFuture1.get(), respCacheFuture2.get());
+
+        val setResult1 = new AtomicBoolean();
+        val setResult2 = new AtomicBoolean();
+        val respResult = new RespResult();
+
+        setResult1.set(false);
+        setResult2.set(false);
+        val respCacheRx1 = client.testCacheRx("req-future");
+        val respCacheRx2 = client.testCacheRx("req-future");
+        assertNotSame(respCacheFuture1, respCacheFuture2);
+        respCacheRx1.subscribe(resp -> {
+            respResult.setResult1(resp);
+            setResult1.set(true);
+        });
+        respCacheRx2.subscribe(resp -> {
+            respResult.setResult2(resp);
+            setResult2.set(true);
+        });
+        await().forever().untilAsserted(() ->
+                assertTrue(setResult1.get() && setResult2.get()));
+        assertEquals(respResult.getResult1(), respResult.getResult2());
+
+        setResult1.set(false);
+        setResult2.set(false);
+        val respCacheRx21 = client.testCacheRx2("req-future");
+        val respCacheRx22 = client.testCacheRx2("req-future");
+        assertNotSame(respCacheFuture1, respCacheFuture2);
+        respCacheRx21.subscribe(resp -> {
+            respResult.setResult1(resp);
+            setResult1.set(true);
+        });
+        respCacheRx22.subscribe(resp -> {
+            respResult.setResult2(resp);
+            setResult2.set(true);
+        });
+        await().forever().untilAsserted(() ->
+                assertTrue(setResult1.get() && setResult2.get()));
+        assertEquals(respResult.getResult1(), respResult.getResult2());
+
+        setResult1.set(false);
+        setResult2.set(false);
+        val respCacheRx31 = client.testCacheRx3("req-future");
+        val respCacheRx32 = client.testCacheRx3("req-future");
+        assertNotSame(respCacheFuture1, respCacheFuture2);
+        respCacheRx31.subscribe(resp -> {
+            respResult.setResult1(resp);
+            setResult1.set(true);
+        });
+        respCacheRx32.subscribe(resp -> {
+            respResult.setResult2(resp);
+            setResult2.set(true);
+        });
+        await().forever().untilAsserted(() ->
+                assertTrue(setResult1.get() && setResult2.get()));
+        assertEquals(respResult.getResult1(), respResult.getResult2());
 
         assertThrows(GRpcClientException.class,
                 () -> GRpcFactory.getClient(ErrorClient.class));
@@ -92,5 +154,12 @@ public class SimpleTest {
         val respCacheFuture2 = client.testCacheFuture("req-future");
         assertNotSame(respCacheFuture1, respCacheFuture2);
         assertEquals(respCacheFuture1.get(), respCacheFuture2.get());
+    }
+
+    @Getter
+    @Setter
+    private static final class RespResult {
+        private String result1;
+        private String result2;
     }
 }

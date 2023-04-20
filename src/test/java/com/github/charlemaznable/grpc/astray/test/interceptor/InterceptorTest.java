@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
@@ -21,6 +23,7 @@ public class InterceptorTest {
     @Autowired
     private InterceptorLogger logger;
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @SneakyThrows
     @Test
     public void testInterceptor() {
@@ -29,5 +32,32 @@ public class InterceptorTest {
         assertEquals("intercepted response: intercepted Hello GRpc, ^_^", future.get());
         assertEquals("intercepted Hello GRpc", logger.getLogRequest());
         assertEquals("response: intercepted Hello GRpc, ^_^", logger.getLogResponse());
+
+        val finished = new AtomicBoolean();
+        client.testRx("Hello GRpc Rx").subscribe(resp -> {
+            assertEquals("intercepted response: intercepted Hello GRpc Rx, ^_^", resp);
+            assertEquals("intercepted Hello GRpc Rx", logger.getLogRequest());
+            assertEquals("response: intercepted Hello GRpc Rx, ^_^", logger.getLogResponse());
+            finished.set(true);
+        });
+        await().forever().until(finished::get);
+
+        finished.set(false);
+        client.testRx2("Hello GRpc Rx2").subscribe(resp -> {
+            assertEquals("intercepted response: intercepted Hello GRpc Rx2, ^_^", resp);
+            assertEquals("intercepted Hello GRpc Rx2", logger.getLogRequest());
+            assertEquals("response: intercepted Hello GRpc Rx2, ^_^", logger.getLogResponse());
+            finished.set(true);
+        });
+        await().forever().until(finished::get);
+
+        finished.set(false);
+        client.testRx3("Hello GRpc Rx3").subscribe(resp -> {
+            assertEquals("intercepted response: intercepted Hello GRpc Rx3, ^_^", resp);
+            assertEquals("intercepted Hello GRpc Rx3", logger.getLogRequest());
+            assertEquals("response: intercepted Hello GRpc Rx3, ^_^", logger.getLogResponse());
+            finished.set(true);
+        });
+        await().forever().until(finished::get);
     }
 }

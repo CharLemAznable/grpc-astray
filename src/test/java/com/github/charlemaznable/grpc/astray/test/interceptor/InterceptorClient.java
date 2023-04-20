@@ -12,4 +12,13 @@ public interface InterceptorClient {
 
     @GRpcCall(name = "InterceptorService/Test", ignoreServiceName = true)
     Future<String> test(String req);
+
+    @GRpcCall(name = "InterceptorService/Test", ignoreServiceName = true)
+    rx.Single<String> testRx(String req);
+
+    @GRpcCall(name = "InterceptorService/Test", ignoreServiceName = true)
+    io.reactivex.Single<String> testRx2(String req);
+
+    @GRpcCall(name = "InterceptorService/Test", ignoreServiceName = true)
+    io.reactivex.rxjava3.core.Single<String> testRx3(String req);
 }

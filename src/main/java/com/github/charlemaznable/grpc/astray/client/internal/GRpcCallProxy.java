@@ -3,6 +3,10 @@ package com.github.charlemaznable.grpc.astray.client.internal;
 import com.github.charlemaznable.grpc.astray.client.GRpcCall;
 import com.github.charlemaznable.grpc.astray.client.GRpcClientException;
 import com.github.charlemaznable.grpc.astray.client.elf.CallOptionsConfigElf;
+import com.github.charlemaznable.httpclient.ohclient.rxjava.OhRxJava2Helper;
+import com.github.charlemaznable.httpclient.ohclient.rxjava.OhRxJava3Helper;
+import com.github.charlemaznable.httpclient.ohclient.rxjava.OhRxJavaHelper;
+import com.github.charlemaznable.httpclient.rxjava.RxJavaHelper;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.MethodDescriptor;
@@ -35,7 +39,11 @@ public final class GRpcCallProxy {
     @Getter
     @Accessors(fluent = true)
     GRpcClientProxy proxy;
-    boolean returnFuture; // Future<V>
+    boolean returnFuture;
+    boolean returnCoreFuture;
+    boolean returnRxJavaSingle;
+    boolean returnRxJava2Single;
+    boolean returnRxJava3Single;
     Class<?> returnType;
     MethodDescriptor<Object, Object> methodDescriptor;
 
@@ -49,7 +57,7 @@ public final class GRpcCallProxy {
 
     private void processReturnType(Method method) {
         Class<?> rt = method.getReturnType();
-        this.returnFuture = Future.class == rt;
+        this.returnFuture = checkReturnFuture(rt);
 
         val genericReturnType = method.getGenericReturnType();
         if (!(genericReturnType instanceof ParameterizedType parameterizedType)) {
@@ -75,12 +83,30 @@ public final class GRpcCallProxy {
         this.returnType = rt;
     }
 
+    private boolean checkReturnFuture(Class<?> returnType) {
+        returnCoreFuture = Future.class == returnType;
+        returnRxJavaSingle = RxJavaHelper.checkReturnRxJavaSingle(returnType);
+        returnRxJava2Single = RxJavaHelper.checkReturnRxJava2Single(returnType);
+        returnRxJava3Single = RxJavaHelper.checkReturnRxJava3Single(returnType);
+        return returnCoreFuture || returnRxJavaSingle || returnRxJava2Single || returnRxJava3Single;
+    }
+
+    @SuppressWarnings("ReactiveStreamsUnusedPublisher")
     Object execute(Channel channel, Object[] args) {
         if (isNull(this.methodDescriptor) || 1 != args.length) return null;
         val callOptions = CallOptionsConfigElf.configCallOptions(CallOptions.DEFAULT, this, args);
         if (this.returnFuture) {
-            return futureUnaryCall(channel.newCall(
+            val future = futureUnaryCall(channel.newCall(
                     this.methodDescriptor, callOptions), args[0]);
+            if (this.returnRxJavaSingle) {
+                return OhRxJavaHelper.buildSingle(future);
+            } else if (this.returnRxJava2Single) {
+                return OhRxJava2Helper.buildSingle(future);
+            } else if (this.returnRxJava3Single) {
+                return OhRxJava3Helper.buildSingle(future);
+            } else {
+                return future;
+            }
         }
         return blockingUnaryCall(channel,
                 this.methodDescriptor, callOptions, args[0]);
