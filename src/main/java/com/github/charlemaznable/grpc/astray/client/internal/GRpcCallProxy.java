@@ -1,12 +1,12 @@
 package com.github.charlemaznable.grpc.astray.client.internal;
 
+import com.github.charlemaznable.core.rxjava.RxJava1BuildHelper;
+import com.github.charlemaznable.core.rxjava.RxJava2BuildHelper;
+import com.github.charlemaznable.core.rxjava.RxJava3BuildHelper;
+import com.github.charlemaznable.core.rxjava.RxJavaCheckHelper;
 import com.github.charlemaznable.grpc.astray.client.GRpcCall;
 import com.github.charlemaznable.grpc.astray.client.GRpcClientException;
 import com.github.charlemaznable.grpc.astray.client.elf.CallOptionsConfigElf;
-import com.github.charlemaznable.httpclient.ohclient.rxjava.OhRxJava2Helper;
-import com.github.charlemaznable.httpclient.ohclient.rxjava.OhRxJava3Helper;
-import com.github.charlemaznable.httpclient.ohclient.rxjava.OhRxJavaHelper;
-import com.github.charlemaznable.httpclient.rxjava.RxJavaHelper;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.MethodDescriptor;
@@ -85,9 +85,9 @@ public final class GRpcCallProxy {
 
     private boolean checkReturnFuture(Class<?> returnType) {
         returnCoreFuture = Future.class == returnType;
-        returnRxJavaSingle = RxJavaHelper.checkReturnRxJavaSingle(returnType);
-        returnRxJava2Single = RxJavaHelper.checkReturnRxJava2Single(returnType);
-        returnRxJava3Single = RxJavaHelper.checkReturnRxJava3Single(returnType);
+        returnRxJavaSingle = RxJavaCheckHelper.checkReturnRxJavaSingle(returnType);
+        returnRxJava2Single = RxJavaCheckHelper.checkReturnRxJava2Single(returnType);
+        returnRxJava3Single = RxJavaCheckHelper.checkReturnRxJava3Single(returnType);
         return returnCoreFuture || returnRxJavaSingle || returnRxJava2Single || returnRxJava3Single;
     }
 
@@ -99,11 +99,11 @@ public final class GRpcCallProxy {
             val future = futureUnaryCall(channel.newCall(
                     this.methodDescriptor, callOptions), args[0]);
             if (this.returnRxJavaSingle) {
-                return OhRxJavaHelper.buildSingle(future);
+                return RxJava1BuildHelper.buildSingle(future);
             } else if (this.returnRxJava2Single) {
-                return OhRxJava2Helper.buildSingle(future);
+                return RxJava2BuildHelper.buildSingle(future);
             } else if (this.returnRxJava3Single) {
-                return OhRxJava3Helper.buildSingle(future);
+                return RxJava3BuildHelper.buildSingle(future);
             } else {
                 return future;
             }
