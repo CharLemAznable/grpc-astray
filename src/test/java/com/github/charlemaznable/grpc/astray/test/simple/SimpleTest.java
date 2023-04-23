@@ -120,6 +120,23 @@ public class SimpleTest {
                 assertTrue(setResult1.get() && setResult2.get()));
         assertEquals(respResult.getResult1(), respResult.getResult2());
 
+        setResult1.set(false);
+        setResult2.set(false);
+        val respCacheUni1 = client.testCacheUni("req-future");
+        val respCacheUni2 = client.testCacheUni("req-future");
+        assertNotSame(respCacheFuture1, respCacheFuture2);
+        respCacheUni1.subscribe().with(resp -> {
+            respResult.setResult1(resp);
+            setResult1.set(true);
+        });
+        respCacheUni2.subscribe().with(resp -> {
+            respResult.setResult2(resp);
+            setResult2.set(true);
+        });
+        await().forever().untilAsserted(() ->
+                assertTrue(setResult1.get() && setResult2.get()));
+        assertEquals(respResult.getResult1(), respResult.getResult2());
+
         assertThrows(GRpcClientException.class,
                 () -> GRpcFactory.getClient(ErrorClient.class));
     }

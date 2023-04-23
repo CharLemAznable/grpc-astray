@@ -6,6 +6,7 @@ import com.github.charlemaznable.grpc.astray.client.GRpcChannel;
 import com.github.charlemaznable.grpc.astray.client.GRpcChannelBalance;
 import com.github.charlemaznable.grpc.astray.client.GRpcChannelBalance.RoundRobinBalancer;
 import com.github.charlemaznable.grpc.astray.client.GRpcClient;
+import io.smallrye.mutiny.Uni;
 
 import java.util.concurrent.Future;
 
@@ -52,4 +53,8 @@ public interface SimpleClient {
     @WestCacheable
     @GRpcCall("TestCache")
     io.reactivex.rxjava3.core.Single<String> testCacheRx3(String req);
+
+    @WestCacheable
+    @GRpcCall("TestCache")
+    Uni<String> testCacheUni(String req);
 }

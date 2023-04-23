@@ -1,5 +1,7 @@
 package com.github.charlemaznable.grpc.astray.client.internal;
 
+import com.github.charlemaznable.core.mutiny.MutinyBuildHelper;
+import com.github.charlemaznable.core.mutiny.MutinyCheckHelper;
 import com.github.charlemaznable.core.rxjava.RxJava1BuildHelper;
 import com.github.charlemaznable.core.rxjava.RxJava2BuildHelper;
 import com.github.charlemaznable.core.rxjava.RxJava3BuildHelper;
@@ -40,10 +42,11 @@ public final class GRpcCallProxy {
     @Accessors(fluent = true)
     GRpcClientProxy proxy;
     boolean returnFuture;
-    boolean returnCoreFuture;
+    boolean returnJavaFuture;
     boolean returnRxJavaSingle;
     boolean returnRxJava2Single;
     boolean returnRxJava3Single;
+    boolean returnMutinyUni;
     Class<?> returnType;
     MethodDescriptor<Object, Object> methodDescriptor;
 
@@ -84,11 +87,14 @@ public final class GRpcCallProxy {
     }
 
     private boolean checkReturnFuture(Class<?> returnType) {
-        returnCoreFuture = Future.class == returnType;
+        returnJavaFuture = Future.class == returnType;
         returnRxJavaSingle = RxJavaCheckHelper.checkReturnRxJavaSingle(returnType);
         returnRxJava2Single = RxJavaCheckHelper.checkReturnRxJava2Single(returnType);
         returnRxJava3Single = RxJavaCheckHelper.checkReturnRxJava3Single(returnType);
-        return returnCoreFuture || returnRxJavaSingle || returnRxJava2Single || returnRxJava3Single;
+        returnMutinyUni = MutinyCheckHelper.checkReturnMutinyUni(returnType);
+        return returnJavaFuture
+                || returnRxJavaSingle || returnRxJava2Single || returnRxJava3Single
+                || returnMutinyUni;
     }
 
     @SuppressWarnings("ReactiveStreamsUnusedPublisher")
@@ -99,11 +105,13 @@ public final class GRpcCallProxy {
             val future = futureUnaryCall(channel.newCall(
                     this.methodDescriptor, callOptions), args[0]);
             if (this.returnRxJavaSingle) {
-                return RxJava1BuildHelper.buildSingle(future);
+                return RxJava1BuildHelper.buildSingleFromFuture(future);
             } else if (this.returnRxJava2Single) {
-                return RxJava2BuildHelper.buildSingle(future);
+                return RxJava2BuildHelper.buildSingleFromFuture(future);
             } else if (this.returnRxJava3Single) {
-                return RxJava3BuildHelper.buildSingle(future);
+                return RxJava3BuildHelper.buildSingleFromFuture(future);
+            } else if (this.returnMutinyUni) {
+                return MutinyBuildHelper.buildUniFromFuture(future);
             } else {
                 return future;
             }

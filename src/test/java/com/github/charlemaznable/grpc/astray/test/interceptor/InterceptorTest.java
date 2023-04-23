@@ -59,5 +59,14 @@ public class InterceptorTest {
             finished.set(true);
         });
         await().forever().until(finished::get);
+
+        finished.set(false);
+        client.testUni("Hello GRpc Uni").subscribe().with(resp -> {
+            assertEquals("intercepted response: intercepted Hello GRpc Uni, ^_^", resp);
+            assertEquals("intercepted Hello GRpc Uni", logger.getLogRequest());
+            assertEquals("response: intercepted Hello GRpc Uni, ^_^", logger.getLogResponse());
+            finished.set(true);
+        });
+        await().forever().until(finished::get);
     }
 }
