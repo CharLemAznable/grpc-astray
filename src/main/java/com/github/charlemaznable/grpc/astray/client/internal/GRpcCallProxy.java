@@ -2,6 +2,8 @@ package com.github.charlemaznable.grpc.astray.client.internal;
 
 import com.github.charlemaznable.core.mutiny.MutinyBuildHelper;
 import com.github.charlemaznable.core.mutiny.MutinyCheckHelper;
+import com.github.charlemaznable.core.reactor.ReactorBuildHelper;
+import com.github.charlemaznable.core.reactor.ReactorCheckHelper;
 import com.github.charlemaznable.core.rxjava.RxJava1BuildHelper;
 import com.github.charlemaznable.core.rxjava.RxJava2BuildHelper;
 import com.github.charlemaznable.core.rxjava.RxJava3BuildHelper;
@@ -9,6 +11,8 @@ import com.github.charlemaznable.core.rxjava.RxJavaCheckHelper;
 import com.github.charlemaznable.grpc.astray.client.GRpcCall;
 import com.github.charlemaznable.grpc.astray.client.GRpcClientException;
 import com.github.charlemaznable.grpc.astray.client.elf.CallOptionsConfigElf;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.MethodDescriptor;
@@ -17,10 +21,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.val;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 import static com.github.charlemaznable.core.lang.Condition.blankThen;
@@ -43,6 +49,7 @@ public final class GRpcCallProxy {
     GRpcClientProxy proxy;
     boolean returnFuture;
     boolean returnJavaFuture;
+    boolean returnReactorMono;
     boolean returnRxJavaSingle;
     boolean returnRxJava2Single;
     boolean returnRxJava3Single;
@@ -88,11 +95,12 @@ public final class GRpcCallProxy {
 
     private boolean checkReturnFuture(Class<?> returnType) {
         returnJavaFuture = Future.class == returnType;
+        returnReactorMono = ReactorCheckHelper.checkReturnReactorMono(returnType);
         returnRxJavaSingle = RxJavaCheckHelper.checkReturnRxJavaSingle(returnType);
         returnRxJava2Single = RxJavaCheckHelper.checkReturnRxJava2Single(returnType);
         returnRxJava3Single = RxJavaCheckHelper.checkReturnRxJava3Single(returnType);
         returnMutinyUni = MutinyCheckHelper.checkReturnMutinyUni(returnType);
-        return returnJavaFuture
+        return returnJavaFuture || returnReactorMono
                 || returnRxJavaSingle || returnRxJava2Single || returnRxJava3Single
                 || returnMutinyUni;
     }
@@ -104,7 +112,21 @@ public final class GRpcCallProxy {
         if (this.returnFuture) {
             val future = futureUnaryCall(channel.newCall(
                     this.methodDescriptor, callOptions), args[0]);
-            if (this.returnRxJavaSingle) {
+            if (this.returnReactorMono) {
+                val completableFuture = new CompletableFuture<>();
+                Futures.addCallback(future, new FutureCallback<>() {
+                    @Override
+                    public void onSuccess(Object result) {
+                        completableFuture.complete(result);
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull Throwable t) {
+                        completableFuture.completeExceptionally(t);
+                    }
+                }, completableFuture.defaultExecutor());
+                return ReactorBuildHelper.buildMonoFromFuture(completableFuture);
+            } else if (this.returnRxJavaSingle) {
                 return RxJava1BuildHelper.buildSingleFromFuture(future);
             } else if (this.returnRxJava2Single) {
                 return RxJava2BuildHelper.buildSingleFromFuture(future);

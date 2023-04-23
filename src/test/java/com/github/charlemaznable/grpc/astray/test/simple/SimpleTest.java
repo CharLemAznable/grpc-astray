@@ -71,9 +71,26 @@ public class SimpleTest {
 
         setResult1.set(false);
         setResult2.set(false);
+        val respCacheMono1 = client.testCacheMono("req-future");
+        val respCacheMono2 = client.testCacheMono("req-future");
+        assertNotSame(respCacheMono1, respCacheMono2);
+        respCacheMono1.subscribe(resp -> {
+            respResult.setResult1(resp);
+            setResult1.set(true);
+        });
+        respCacheMono2.subscribe(resp -> {
+            respResult.setResult2(resp);
+            setResult2.set(true);
+        });
+        await().forever().untilAsserted(() ->
+                assertTrue(setResult1.get() && setResult2.get()));
+        assertEquals(respResult.getResult1(), respResult.getResult2());
+
+        setResult1.set(false);
+        setResult2.set(false);
         val respCacheRx1 = client.testCacheRx("req-future");
         val respCacheRx2 = client.testCacheRx("req-future");
-        assertNotSame(respCacheFuture1, respCacheFuture2);
+        assertNotSame(respCacheRx1, respCacheRx2);
         respCacheRx1.subscribe(resp -> {
             respResult.setResult1(resp);
             setResult1.set(true);
@@ -90,7 +107,7 @@ public class SimpleTest {
         setResult2.set(false);
         val respCacheRx21 = client.testCacheRx2("req-future");
         val respCacheRx22 = client.testCacheRx2("req-future");
-        assertNotSame(respCacheFuture1, respCacheFuture2);
+        assertNotSame(respCacheRx21, respCacheRx22);
         respCacheRx21.subscribe(resp -> {
             respResult.setResult1(resp);
             setResult1.set(true);
@@ -107,7 +124,7 @@ public class SimpleTest {
         setResult2.set(false);
         val respCacheRx31 = client.testCacheRx3("req-future");
         val respCacheRx32 = client.testCacheRx3("req-future");
-        assertNotSame(respCacheFuture1, respCacheFuture2);
+        assertNotSame(respCacheRx31, respCacheRx32);
         respCacheRx31.subscribe(resp -> {
             respResult.setResult1(resp);
             setResult1.set(true);
@@ -124,7 +141,7 @@ public class SimpleTest {
         setResult2.set(false);
         val respCacheUni1 = client.testCacheUni("req-future");
         val respCacheUni2 = client.testCacheUni("req-future");
-        assertNotSame(respCacheFuture1, respCacheFuture2);
+        assertNotSame(respCacheUni1, respCacheUni2);
         respCacheUni1.subscribe().with(resp -> {
             respResult.setResult1(resp);
             setResult1.set(true);

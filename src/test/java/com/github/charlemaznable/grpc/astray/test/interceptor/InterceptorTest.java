@@ -34,6 +34,15 @@ public class InterceptorTest {
         assertEquals("response: intercepted Hello GRpc, ^_^", logger.getLogResponse());
 
         val finished = new AtomicBoolean();
+        client.testMono("Hello GRpc Mono").subscribe(resp -> {
+            assertEquals("intercepted response: intercepted Hello GRpc Mono, ^_^", resp);
+            assertEquals("intercepted Hello GRpc Mono", logger.getLogRequest());
+            assertEquals("response: intercepted Hello GRpc Mono, ^_^", logger.getLogResponse());
+            finished.set(true);
+        });
+        await().forever().until(finished::get);
+
+        finished.set(false);
         client.testRx("Hello GRpc Rx").subscribe(resp -> {
             assertEquals("intercepted response: intercepted Hello GRpc Rx, ^_^", resp);
             assertEquals("intercepted Hello GRpc Rx", logger.getLogRequest());

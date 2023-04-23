@@ -4,6 +4,7 @@ import com.github.charlemaznable.grpc.astray.client.GRpcCall;
 import com.github.charlemaznable.grpc.astray.client.GRpcClient;
 import com.github.charlemaznable.grpc.astray.test.common.EmbeddedChannel;
 import io.smallrye.mutiny.Uni;
+import reactor.core.publisher.Mono;
 
 import java.util.concurrent.Future;
 
@@ -13,6 +14,9 @@ public interface InterceptorClient {
 
     @GRpcCall(name = "InterceptorService/Test", ignoreServiceName = true)
     Future<String> test(String req);
+
+    @GRpcCall(name = "InterceptorService/Test", ignoreServiceName = true)
+    Mono<String> testMono(String req);
 
     @GRpcCall(name = "InterceptorService/Test", ignoreServiceName = true)
     rx.Single<String> testRx(String req);
