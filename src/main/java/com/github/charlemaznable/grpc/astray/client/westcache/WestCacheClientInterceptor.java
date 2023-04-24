@@ -79,13 +79,13 @@ public final class WestCacheClientInterceptor implements ClientInterceptor {
         @Override
         public void sendMessage(Q message) {
             val cachedOptional = LoadingCachee.get(localCache, context);
-            if (cachedOptional.isEmpty()) lockMap.putIfAbsent(context, context);
             if (cachedOptional.isPresent()) {
                 callListener.cachedMessage.set(true);
                 val cacheResponse = cachedOptional.get();
                 callListener.onMessage((R) cacheResponse);
                 callListener.onClose(Status.OK, new Metadata());
             } else {
+                lockMap.putIfAbsent(context, context);
                 if (lockMap.get(context) == context) {
                     super.sendMessage(message);
                 } else {
