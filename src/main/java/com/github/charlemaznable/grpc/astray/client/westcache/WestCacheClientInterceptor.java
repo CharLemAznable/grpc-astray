@@ -13,6 +13,7 @@ import io.grpc.ForwardingClientCallListener;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
 import io.grpc.Status;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.Map;
@@ -27,6 +28,7 @@ import static com.google.common.cache.CacheLoader.from;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
+@Slf4j
 public final class WestCacheClientInterceptor implements ClientInterceptor {
 
     private final LoadingCache<WestCacheContext, Optional<?>> localCache;
@@ -82,8 +84,11 @@ public final class WestCacheClientInterceptor implements ClientInterceptor {
             if (cachedOptional.isPresent()) {
                 callListener.cachedMessage.set(true);
                 val cacheResponse = cachedOptional.get();
-                callListener.onMessage((R) cacheResponse);
-                callListener.onClose(Status.OK, new Metadata());
+                try {
+                    callListener.onMessage((R) cacheResponse);
+                } finally {
+                    callListener.onClose(Status.OK, new Metadata());
+                }
             } else {
                 lockMap.putIfAbsent(context, context);
                 if (lockMap.get(context) == context) {
@@ -110,16 +115,22 @@ public final class WestCacheClientInterceptor implements ClientInterceptor {
 
         @Override
         public void onMessage(R message) {
-            if (!cachedMessage.get()) {
-                try {
+            try {
+                if (!cachedMessage.get()) {
                     context.cachePut(message);
                     localCache.put(context, Optional.of(message));
-                } finally {
-                    // 写入缓存错误 -> 释放防死锁
-                    lockMap.remove(context);
                 }
+            } catch (Exception e) {
+                log.warn("Cache Writing with Error: ", e);
+            } finally {
+                super.onMessage(message);
             }
-            super.onMessage(message);
+        }
+
+        @Override
+        public void onClose(Status status, Metadata trailers) {
+            lockMap.remove(context);
+            super.onClose(status, trailers);
         }
     }
 }
