@@ -111,9 +111,13 @@ public final class WestCacheClientInterceptor implements ClientInterceptor {
         @Override
         public void onMessage(R message) {
             if (!cachedMessage.get()) {
-                context.cachePut(message);
-                localCache.put(context, Optional.of(message));
-                lockMap.remove(context);
+                try {
+                    context.cachePut(message);
+                    localCache.put(context, Optional.of(message));
+                } finally {
+                    // 写入缓存错误 -> 释放防死锁
+                    lockMap.remove(context);
+                }
             }
             super.onMessage(message);
         }
