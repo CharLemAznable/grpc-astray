@@ -83,15 +83,13 @@ public final class WestCacheClientInterceptor implements ClientInterceptor {
             val cachedOptional = LoadingCachee.get(localCache, context);
             if (cachedOptional.isPresent()) {
                 callListener.cachedMessage.set(true);
-                val cacheResponse = cachedOptional.get();
                 try {
-                    callListener.onMessage((R) cacheResponse);
+                    callListener.onMessage((R) cachedOptional.get());
                 } finally {
                     callListener.onClose(Status.OK, new Metadata());
                 }
             } else {
-                lockMap.putIfAbsent(context, context);
-                if (lockMap.get(context) == context) {
+                if (isNull(lockMap.putIfAbsent(context, context))) {
                     super.sendMessage(message);
                 } else {
                     await(10);
@@ -117,8 +115,8 @@ public final class WestCacheClientInterceptor implements ClientInterceptor {
         public void onMessage(R message) {
             try {
                 if (!cachedMessage.get()) {
-                    context.cachePut(message);
                     localCache.put(context, Optional.of(message));
+                    context.cachePut(message);
                 }
             } catch (Exception e) {
                 log.warn("Cache Writing with Error: ", e);
