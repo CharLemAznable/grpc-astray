@@ -51,7 +51,7 @@ public class NettyServerBuilderConfiguration implements EnvironmentAware {
                     ? nettyShadedServerBuilder(grpcServerProperties)
                     : nettyServerBuilder(grpcServerProperties);
         } else if (nettyShadedConfig) return nettyShadedServerBuilder(grpcServerProperties);
-        else if (nettyConfig) return nettyShadedServerBuilder(grpcServerProperties);
+        else if (nettyConfig) return nettyServerBuilder(grpcServerProperties);
         else return null;
     }
 
