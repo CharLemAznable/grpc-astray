@@ -39,7 +39,7 @@ The Java gRPC Server/Client implementation, using JSON marshaller.
 <dependency>
   <groupId>com.github.charlemaznable</groupId>
   <artifactId>grpc-astray</artifactId>
-  <version>2023.2.3-SNAPSHOT</version>
+  <version>2024.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
